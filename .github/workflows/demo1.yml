@@ -5,10 +5,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Output event data
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          payload-delimiter: "_"
-          webhook: ${{ secrets.TEST_CHANNEL_SLACK_WEBHOOK }}
-          webhook-type: webhook-trigger
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_USERNAME: Ms Devops
+          SLACK_TITLE: Workflow Triggered
+          MSG_MINIMAL: actions url
+          SLACK_WEBHOOK: ${{ secrets.TEST_CHANNEL_SLACK_WEBHOOK }}
         
