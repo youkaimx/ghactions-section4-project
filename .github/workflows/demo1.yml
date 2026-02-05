@@ -9,7 +9,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_USERNAME: Ms Devops
-          SLACK_TITLE: Workflow Triggered
-          MSG_MINIMAL: actions url
+          SLACK_TITLE: The Workflow was Triggered
+          MSG_MINIMAL: Heads Up!
           SLACK_WEBHOOK: ${{ secrets.TEST_CHANNEL_SLACK_WEBHOOK }}
         
