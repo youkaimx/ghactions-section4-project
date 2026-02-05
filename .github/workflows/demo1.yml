@@ -1,15 +1,50 @@
 name: Events Demo 1
-on: 
-  workflow_dispatch: 
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, closed]
+  pull_request_review:
+    types: [submitted]
 jobs:
-  deploy:
+  slack-notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_USERNAME: Ms Devops
-          SLACK_TITLE: The Workflow was Triggered
-          MSG_MINIMAL: Heads Up!
-          SLACK_WEBHOOK: ${{ secrets.TEST_CHANNEL_SLACK_WEBHOOK }}
-        
+      # New PR opened
+      - name: Slack - New PR
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.TEST_CHANNEL_SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*New PR opened* :inbox_tray:\n<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\nAuthor: ${{ github.event.pull_request.user.login }}"
+
+      # PR approved
+      - name: Slack - PR Approved
+        if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.TEST_CHANNEL_SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*PR approved* :white_check_mark:\n<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\nApproved by: ${{ github.event.review.user.login }}"
+
+      # PR merged
+      - name: Slack - PR Merged
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.TEST_CHANNEL_SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*PR merged* :rocket:\n<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\nMerged by: ${{ github.event.pull_request.merged_by.login }}"
+
+      # Manual trigger (workflow_dispatch)
+      - name: Slack - Workflow triggered
+        if: github.event_name == 'workflow_dispatch'
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.TEST_CHANNEL_SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Workflow triggered* :gear:\nThe Events Demo 1 workflow was run manually."
