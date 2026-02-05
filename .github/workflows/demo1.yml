@@ -39,6 +39,16 @@ jobs:
           payload: |
             text: "*PR merged* :rocket:\n<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\nMerged by: ${{ github.event.pull_request.merged_by.login }}"
 
+      # PR closed (not merged)
+      - name: Slack - PR Closed
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged != true
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.TEST_CHANNEL_SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*PR closed* :x:\n<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\nClosed without merging."
+
       # Manual trigger (workflow_dispatch)
       - name: Slack - Workflow triggered
         if: github.event_name == 'workflow_dispatch'
